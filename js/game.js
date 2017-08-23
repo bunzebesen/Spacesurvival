@@ -7,10 +7,11 @@ var game = {
      * object where to store game global data
      */
     data : {
-        // score
+        // objectives
         score : 0,
         health : 8,
         oxygen : 300,
+        foundItems : 0,
     },
 
     /**

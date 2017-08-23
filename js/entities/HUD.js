@@ -54,7 +54,7 @@ game.HUD.FoundItem = me.Renderable.extend( {
 
         var font = new me.Font('monospace', 50, 'white');
 
-        this.found = 0;
+//        this.found = 0;
 
         if (me.device.isMobile) {
             this.widthItem = me.game.viewport.width - ((2.8 / 3) * me.game.viewport.width);
@@ -69,15 +69,15 @@ game.HUD.FoundItem = me.Renderable.extend( {
 
     draw : function (renderer) {
         var context = renderer.getContext()
-        this.font.draw (context, "FOUND SPACESHIP PARTS: " + this.found, this.widthItem, this.height);
+        this.font.draw (context, "FOUND SPACESHIP PARTS: " + game.data.foundItems, this.widthItem, this.height);
     },
 
-    addScore: function (score) {
-        this.found +=  score;
+    foundOne: function () {
+        game.data.foundItems +=  1;
     },
 
-    resetScore: function() {
-        this.found = 0;
+    reset: function() {
+        game.data.foundItems = 0;
     }
 
 });
@@ -122,8 +122,6 @@ game.HUD.HealthItem = me.Renderable.extend( {
     init: function (x, y) {
         this._super(me.Renderable, 'init', [x, y, 50, 100]);
         this.name = "HealthItem";
-
-        this.player = null;
     },
 
     draw: function (renderer) {
@@ -134,6 +132,10 @@ game.HUD.HealthItem = me.Renderable.extend( {
                               20,
                               20);
         }
+    },
+
+    reset: function() {
+        game.data.health = 8;
     }
 }); 
 
@@ -142,21 +144,25 @@ game.HUD.OxygenScreenItem = me.Renderable.extend( {
         this._super(me.Renderable, 'init', [x, y, 50, 100]);
         this.name = "OxygenScreenItem";
 
-        this.height = game.data.oxygen;
         this.counter = 0;
     },
 
     update : function (dt) {
+        // oxygen function
         this.counter += 0.15 * me.timer.tick; 
+
+        // oxygen
         this.heightBlue = game.data.oxygen - this.counter;
         if (this.heightBlue <= 0) {
             this.heightBlue = 0;
         }
+
+        // background
         this.heightBlack = game.data.oxygen;
 
-        if (game.data.oxygen > 300) {
+    /*    if (game.data.oxygen > 300) {
             this.heightBlack -= 50;
-        }
+        }  */
     },
 
     draw: function (renderer) {
@@ -171,6 +177,10 @@ game.HUD.OxygenScreenItem = me.Renderable.extend( {
                           this.pos.y,
                           30,
                           this.heightBlue);
+    },
+
+    reset: function() {
+        game.data.oxygen = 300;
     }
 });  
 
