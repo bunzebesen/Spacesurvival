@@ -29,7 +29,7 @@ game.HUD.Container = me.Container.extend({
         this.addChild(new game.HUD.FoundItem(0, 0));   
         this.addChild(new game.HUD.TextItem(0, 0));       
         this.addChild(new game.HUD.HealthItem(me.game.viewport.width - ((2.9 / 3) * me.game.viewport.width), 50));   
-        this.addChild(new game.HUD.OxygenScreenItem(me.game.viewport.width - 100, 50));  
+        this.addChild(new game.HUD.FuelItem(me.game.viewport.width - 100, 350));  
         this.addChild(new game.HUD.InfoItem(0, 0));
     }
 });
@@ -78,6 +78,7 @@ game.HUD.FoundItem = me.Renderable.extend( {
 
     reset: function() {
         game.data.foundItems = 0;
+        game.data.score = 0;
     }
 
 });
@@ -139,28 +140,25 @@ game.HUD.HealthItem = me.Renderable.extend( {
     }
 }); 
 
-game.HUD.OxygenScreenItem = me.Renderable.extend( {
+game.HUD.FuelItem = me.Renderable.extend( {
     init: function (x, y) {
         this._super(me.Renderable, 'init', [x, y, 50, 100]);
-        this.name = "OxygenScreenItem";
-
-        this.counter = 0;
+        this.name = "FuelItem";
     },
 
     update : function (dt) {
-        // oxygen function
-        this.counter += 0.15 * me.timer.tick; 
-
-        // oxygen
-        this.heightBlue = game.data.oxygen - this.counter;
-        if (this.heightBlue <= 0) {
-            this.heightBlue = 0;
+        // fuel function    
+        if(me.input.isKeyPressed('up') || me.input.isKeyPressed('left') || me.input.isKeyPressed('right')){
+            game.data.fuel -= 0.1 * me.timer.tick;
+            console.log(game.data.fuel);
         }
 
-        // background
-        this.heightBlack = game.data.oxygen;
+        // just empty not in different direction
+        if (game.data.fuel <= 0) {
+            game.data.fuel = 0;
+        }
 
-    /*    if (game.data.oxygen > 300) {
+   /*     if (game.data.fuel > 300) {
             this.heightBlack -= 50;
         }  */
     },
@@ -170,17 +168,17 @@ game.HUD.OxygenScreenItem = me.Renderable.extend( {
         renderer.fillRect(this.pos.x,
                           this.pos.y,
                           30,
-                          this.heightBlack);
+                          -300);
         
-        renderer.setColor('blue');
+        renderer.setColor('red');
         renderer.fillRect(this.pos.x,
                           this.pos.y,
                           30,
-                          this.heightBlue);
+                          -game.data.fuel);  
     },
 
     reset: function() {
-        game.data.oxygen = 300;
+        game.data.fuel = 300;
     }
 });  
 
@@ -201,8 +199,8 @@ game.HUD.InfoItem = me.Renderable.extend( {
         this.text3 = "OF COURSE YOU WANT TO RETURN TO YOUR MISSION" ;
         this.text4 = "SO TRY TO FIND ALL OF YOUR SPACESHIP PARTS (6).";
         this.text5 = "AND FIND THE ROBOT PROBES.";
-        this.text6 = "PAY ATTENTION TO YOUR OXYGEN INFORMATION.";
-        this.text7 = "YOU JUST HAVE OXYGEN FOR ABOUT 2 MINUTES.";
+        this.text6 = "PAY ATTENTION TO YOUR FUEL INFORMATION.";
+        this.text7 = "YOU JUST HAVE FUEL FOR ABOUT 2 MINUTES.";
         this.text8 = "YOU ARE NOT THE FIRST PERSON ON THE MARS";
         this.text9 = "SO CARE ABOUT 'THINGS' WHICH WERE LEFT-BEHIND.";
         this.text10 = "IF YOU HAVE FOUND ALL PARTS GO TO THE END OF THE LEVEL";

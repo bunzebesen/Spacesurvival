@@ -7,10 +7,9 @@ var game = {
      * object where to store game global data
      */
     data : {
-        // objectives
         score : 0,
         health : 8,
-        oxygen : 300,
+        fuel : 300,
         foundItems : 0,
     },
 
@@ -54,7 +53,6 @@ var game = {
         me.loader.onload = this.loaded.bind(this);
 
         // set all ressources to be loaded
-
         me.loader.preload(game.resources);
 
         // load everything & display a loading screen
@@ -117,7 +115,7 @@ var game = {
             }
         });
 
-        // switch to PLAY state
+        // switch to INFO state
         me.state.change(me.state.INFO);
     }
 };

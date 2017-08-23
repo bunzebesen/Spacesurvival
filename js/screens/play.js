@@ -3,13 +3,13 @@ game.PlayScreen = me.ScreenObject.extend({
      *  action to perform on state change
      */
     onResetEvent: function() {    
-      // load a level
+        // load a level
         me.levelDirector.loadLevel("level1");
         
         // reset the score
         game.data.score = 0;
         game.data.health = 8;
-        game.data.oxygen = 300;
+        game.data.fuel = 300;
 
         // add our HUD to the game world
         this.HUD = new game.HUD.Container();    
@@ -178,6 +178,7 @@ game.ScoreScreen = me.ScreenObject.extend({
         } else {
             me.game.world.addChild(new me.Sprite(0, 0, me.loader.getImage('background_solar_system_1920_1080')));
         }
+        
         me.game.world.addChild(new(me.Renderable.extend({
          
             init: function() {
@@ -233,16 +234,16 @@ game.ScoreScreen = me.ScreenObject.extend({
             }
         })));
 
-    me.input.bindKey(me.input.KEY.ENTER, "enter", true);
-    me.input.bindKey(me.input.KEY.ESC, "escape", true);
-    this.handler = me.event.subscribe(me.event.KEYDOWN, function (action, keyCode, edge) {
-        if (action === "enter") {
-            // play something on enter
-            me.state.change(me.state.PLAY);
-        } else if (action === "escape") {
-            me.state.change(me.state.INFO);
-        }
-    });   
+        me.input.bindKey(me.input.KEY.ENTER, "enter", true);
+        me.input.bindKey(me.input.KEY.ESC, "escape", true);
+        this.handler = me.event.subscribe(me.event.KEYDOWN, function (action, keyCode, edge) {
+            if (action === "enter") {
+                // play something on enter
+                me.state.change(me.state.PLAY);
+            } else if (action === "escape") {
+                me.state.change(me.state.INFO);
+            }
+        });   
     },
 
     onDestroyEvent: function() {
