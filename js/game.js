@@ -76,7 +76,7 @@ var game = {
 
         // register our objects entity in the object pool
         me.pool.register("mainPlayer", game.PlayerEntity);
-        me.pool.register("EnvironmentalEnemy", game.EnvironmentalEnemy);
+   /*     me.pool.register("EnvironmentalEnemy", game.EnvironmentalEnemy);
         me.pool.register("SpaceshipPartsEntity", game.SpaceshipPartsEntity);
         me.pool.register("SpaceshipEntity", game.SpaceshipEntity);
         me.pool.register("friendlyRoboterEntity", game.friendlyRoboterEntity);
@@ -88,7 +88,7 @@ var game = {
         me.pool.register("HideEntity", game.HideEntity);
         me.pool.register("robotSpeechBubble", game.robotSpeechBubble);
         me.pool.register("PolyEntity", game.PolyEntity);
-        me.pool.register("OxygenItem", game.OxygenItem);
+        me.pool.register("OxygenItem", game.OxygenItem);  */
 
         // load the texture atlas file
         // this will be used by object entities later
