@@ -1,4 +1,4 @@
-game.InfoScreen = me.ScreenObject.extend({
+game.MenuScreen = me.ScreenObject.extend({
     onResetEvent: function() {
 
         // add our UI to the game world
