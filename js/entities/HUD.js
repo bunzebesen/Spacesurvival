@@ -72,10 +72,6 @@ game.HUD.FoundItem = me.Renderable.extend( {
         this.font.draw (context, "FOUND SPACESHIP PARTS: " + game.data.foundItems, this.widthItem, this.height);
     },
 
-    foundOne: function () {
-        game.data.foundItems +=  1;
-    },
-
     reset: function() {
         game.data.foundItems = 0;
         game.data.score = 0;
@@ -150,7 +146,6 @@ game.HUD.FuelItem = me.Renderable.extend( {
         // fuel function    
         if(me.input.isKeyPressed('up') || me.input.isKeyPressed('left') || me.input.isKeyPressed('right')){
             game.data.fuel -= 0.1 * me.timer.tick;
-            console.log(game.data.fuel);
         }
 
         // just empty not in different direction
@@ -331,4 +326,30 @@ game.UI.Button = me.Renderable.extend({
         me.input.releasePointerEvent("pointerdown", this);
         me.input.releasePointerEvent("pointerup",   this);
     },
+});
+
+game.UI.TextInput = me.Renderable.extend({
+    init : function (x, y, type, length) {
+        this.$input = $('<input type="' + type + '" required>').css({
+            "left" : x,
+            "top" : y
+        });
+
+        switch (type) {
+        case "text":
+            this.$input
+                .attr("maxlength", length)
+                .attr("pattern", "[a-zA-Z0-9_\-]+");
+            break;
+        case "number":
+            this.$input.attr("max", length);
+            break;
+        }
+
+        $(me.video.getWrapper()).append(this.$input);
+    },
+
+    destroy : function () {
+        this.$input.remove();
+    }
 });
