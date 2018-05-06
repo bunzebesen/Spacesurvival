@@ -369,6 +369,14 @@ game.SpaceshipPartsEntity = me.CollectableEntity.extend({
 
         if (settings.image === "starfighter_light") {
             this.body.addShape(new me.Rect(this.x, this.y, settings.width, settings.height));
+        } 
+
+        if(settings.image === "starfighter_wing"){
+            var shape = this.body.getShape();
+            shape.scale(1, 0.35);
+            shape.pos.y = settings.height / 1.5;
+
+            this.body.addShape(new me.Rect(250, this.y, settings.width / 2, settings.height));
         }
 
     },
