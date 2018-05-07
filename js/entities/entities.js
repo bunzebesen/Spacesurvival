@@ -186,7 +186,7 @@ game.PlayerEntity = me.Entity.extend({
         }
 
         // victory
-        if (game.data.foundItems >= 1 && this.pos.x >= 6500 && this.pos.y >= 1800 && !game.data.victory) {
+        if (game.data.foundItems >= 7 && this.pos.x >= 7000 && this.pos.y >= 1800 && !game.data.victory) {
             this.victory();
         }
 
@@ -361,9 +361,6 @@ game.PlatformEntity = me.Entity.extend({
  */
 game.SpaceshipPartsEntity = me.CollectableEntity.extend({
     init: function (x, y, settings) {
-        //settings.spritewidth = settings.width;
-        //settings.spriteheight = settings.height;
-
         // call the super constructor
         this._super(me.CollectableEntity, 'init', [x, y , settings]);
 
@@ -540,7 +537,7 @@ game.friendlyRoboterEntity = me.CollectableEntity.extend({
                 game.data.score += 100;
                 this.textItem.setText("YOU GOT THE ROBOT");
                 setTimeout(function() { 
-                    self.textItem.setText("LOOK WHAT HE HAS FOUND");
+                    self.textItem.setText("SEE WHAT HE HAS FOUND");
 
                     var settings = {};
                     settings.width = settings.spritewidth = 36;
@@ -554,7 +551,7 @@ game.friendlyRoboterEntity = me.CollectableEntity.extend({
                     setTimeout(function() {
                         self.textItem.setText("");
                     }, 1500)
-                }, 1500)
+                }, 1000)
             }
 
             clearTimeout(this.timer);
@@ -609,7 +606,7 @@ game.robotSpeechBubble = me.Renderable.extend({
 });
 
 /**
- * agreesive robot
+ * agressive robot
  */
 game.enemyRoboterEntity = me.Entity.extend({
     init: function (x, y, settings) {
@@ -787,7 +784,7 @@ game.LaserEntity = me.Entity.extend({
 /**
  * rocket
  */ 
-game.RocketEntity = me.Entity.extend({
+/*game.Rest = me.Entity.extend({
     init: function (x, y, settings) {
         // super constructor
         this._super(me.Entity, 'init', [x, y, settings]);
@@ -983,7 +980,7 @@ game.RocketEntity = me.Entity.extend({
      //       console.log(this.player.pos.y);
 
        // console.log(this.angle / Math.PI);
-/*        } else if (this.started) {
+           } else if (this.started) {
             if (this.pos.x <= this.player.pos.x) {
                 this.body.vel.x = this.body.accel.x * me.timer.tick;
             } else if (this.pos.x >= this.player.pos.x) {
@@ -1004,7 +1001,7 @@ game.RocketEntity = me.Entity.extend({
 
         if ((this.angle >= 2.8 && this.angle <= 3.3) || (this.angle <= 0.04 && this.angle >= -0.04)) {
             this.body.setVelocity(8, 2.5);
-        }  */
+        }  
 
         if (this.pos.y < 1000) {
       //      this.started = true;
@@ -1030,7 +1027,7 @@ game.RocketEntity = me.Entity.extend({
         // Make all other objects solid
         return false;
     }
-});  
+});  */
 
 /**
  * complete spaceship
@@ -1074,7 +1071,7 @@ game.SpaceshipEntity = me.Entity.extend({
 });
 
 /**
- * Caves
+ * caves
  */
 game.HideEntity = me.Entity.extend({
     init : function (x, y, settings) {
@@ -1112,10 +1109,6 @@ game.HideEntity = me.Entity.extend({
             this.fadeOut();
         }
 
-        if(me.collision.check(this) && this.collided){
-           
-        }
-
         if(!me.collision.check(this) && this.collided){
             this.collided = false;
             this.fadeIn();
@@ -1137,6 +1130,9 @@ game.HideEntity = me.Entity.extend({
     },  
 });  
 
+/**
+ * vieleck
+ */
 game.PolyEntity = me.Entity.extend({
     init : function (x, y, settings) {
 
@@ -1244,31 +1240,290 @@ game.FuelItem = me.Entity.extend({
     }
 });
 
-game.Dummy = me.Entity.extend({
+/**
+ * rocket
+ */
+game.RocketEntity = me.Entity.extend({
     init: function (x, y, settings) {
         // super constructor
         this._super(me.Entity, 'init', [x, y, settings]);
 
         this.player = null;
+        this.body.setVelocity(2, 2);
 
         this.body.gravity = 0;
 
+        this.alwaysUpdate = true;
+
         this.body.collisionType = me.collision.types.ENEMY_OBJECT;
-        this.body.setCollisionMask(me.collision.types.PLAYER_OBJECT);
+
+        this.startPos = settings.startPos;
+        this.startAngle = settings.startAngle;
+
+        // init shape and renderable
+        this.addAngle = 0;
+        this.shape = this.body.getShape();
+        if(this.startAngle == "0"){
+            this.shape.scale(0.5, 0.73);
+            this.shape.pos.x = 15;
+        } if(this.startAngle == "-pi/2"){
+            this.renderable.angle = -Math.PI/2;
+            this.pos.y = settings.y + 40;
+            this.shape.scale(0.73,0.5);
+            this.shape.pos.y = -25;
+            this.shape.pos.x = -40;
+            this.addAngle = 1;
+        }
+
+        // still animation
+        this.renderable.addAnimation ("idle", [0]);
+
+        // fly animatin
+        this.renderable.addAnimation ("fly", [5]);
+
+        // set default one
+        this.renderable.setCurrentAnimation("idle");
 
         // set the renderable position to bottom center
         this.anchorPoint.set(0.5, 1.0);
+
+        // m = y2 - y1 / x2 - x1
+        this.m = 0;
+        this.ydif = 0;
+        this.xdif = 0;
+
+        // f: y = mx + b
+        this.b = 0;
+
+        // tween time
+        this.t = settings.t;
+
+        // distance to player
+        this.s = 0;
+
+        // velocitiy
+        this.v = 0;
+
+        // x aim
+        this.x = 0;
+
+        // activator
+        this.started = false;
+        this.start = false;
+        this.flyAway = false;
+        this.applyAngle = false;
+        this.alive = true;
+
+        // save player pos
+        this.playerX = 0;
+        this.playerY = 0;
     },
 
     update: function (dt) {
-        var self = this;
 
         if (this.player === null) {
             this.player = me.game.world.getChildByName("mainPlayer")[0];
         }
 
-        this.angle = (this.angleTo(this.player));
 
-  //      console.log(this.angle);
+
+
+
+
+        /* ROCKET MOVEMENT */
+
+        // start rocket
+        if(this.distanceTo(this.player) < 750 && !this.start && !this.started){
+            this.renderable.setCurrentAnimation("fly");
+
+            if(this.startAngle == "0" && this.player.pos.y <= this.startPos){
+                this.tween0 = new me.Tween(this.pos).to({y: this.startPos}, 300);
+                this.tween0.start(); 
+            } else if(this.startAngle == "-pi/2" && this.pos.x >= this.player.pos.x){
+                this.tween1 = new me.Tween(this.pos).to({x: this.startPos}, 250);
+                this.tween1.start(); 
+            }
+        }
+
+        // rocket started
+        if(this.startAngle == "0" && this.pos.y == this.startPos){
+            this.start = true;
+        } if(this.startAngle == "-pi/2" && this.pos.x == this.startPos){
+            this.start = true;
+        }
+
+        // fly to player pos and calculate linear function and velocity
+        if(this.start && !this.started){
+            this.started = true;
+            this.applyAngle = true;
+
+            this.playerX = this.player.pos.x;
+            this.playerY = this.player.pos.y;
+            this.ydif = this.player.pos.y - this.pos.y;
+            this.xdif = this.player.pos.x - this.pos.x;
+            this.m = this.ydif / this.xdif;
+            
+            this.b = this.pos.y - (this.m * this.pos.x);
+            this.s = Math.sqrt(Math.pow(this.ydif, 2) + Math.pow(this.xdif, 2));
+            this.v = this.s / this.t; 
+
+            var tween2 = new me.Tween(this.pos).to({x: this.player.pos.x, y: this.player.pos.y}, this.t);
+            tween2.start(); 
+        }
+
+        // arrived at player pos
+        if(this.start && this.started && this.pos.x == this.playerX && this.pos.y == this.playerY){
+            this.flyAway = true;
+        }
+
+        // fly to x = -10 or x = 8010 and y = f(-10) or f(8010) (out of level)
+        if(this.flyAway){
+            this.flyAway = false;
+
+            if(this.xdif <= 0){
+                this.x = -10;
+            } else{
+                this.x = 8010;
+            }
+
+            this.yKoord = (this.m * this.x) + this.b; 
+            this.newS = Math.sqrt(Math.pow(this.yKoord - this.pos.y, 2) + Math.pow(this.x - this.pos.x, 2));
+            this.newT = this.newS / this.v;
+
+            var tween3 = new me.Tween(this.pos).to({x: this.x, y: this.yKoord}, this.newT);
+            tween3.start(); 
+        }
+
+
+
+
+
+
+
+
+        /* ROCKET ANGLE */
+
+        if(this.applyAngle){
+            this.applyAngle = false;
+
+            // angle to player position
+            this.angle = this.angleToPoint(new me.Vector2d(this.playerX, this.playerY));
+            this.renderable.angle = this.angle + (Math.PI / 2);
+
+            // set angle to shape 
+            // (° against clock)
+            // [0]°
+            if(this.angle >= 0 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1 && this.angle <= 0 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1){
+                this.shape.pos.x = 105 - this.addAngle * 100;
+                this.shape.pos.y = 55 - this.addAngle * 80;
+                this.shape.rotate(-Math.PI * (3 / 2) - this.addAngle * Math.PI/2);
+            }
+            // (0-30)° 
+            if(this.angle < 0 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1 && this.angle > -1 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1){
+                this.shape.pos.x = 93 - this.addAngle * 100;
+                this.shape.pos.y = 30 - this.addAngle * 80;
+                this.shape.rotate(Math.PI * (3 / 8) - this.addAngle * Math.PI/2);
+            } // [30-60)°
+            if(this.angle <= -1 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1 && this.angle > -2 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1){
+                this.shape.pos.x = 21 - this.addAngle * 100;
+                this.shape.pos.y = 107 - this.addAngle * 80;
+                this.shape.rotate(-Math.PI * (3 / 4) - this.addAngle * Math.PI/2);
+            } // [60-90)°
+            if(this.angle <= -2 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1 && this.angle > -3 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1){
+                this.shape.pos.x = 46 - this.addAngle * 100;
+                this.shape.pos.y = 0 - this.addAngle * 80;
+                this.shape.rotate(Math.PI * (1 / 8) - this.addAngle * Math.PI/2);
+            } // [90]°
+            if(this.angle <= -3 * ((Math.PI/2 - 0.2) / 3) - 2 * 0.1 && this.angle >= -3 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1){
+                // nothing
+            } // (90-120)° 
+            if(this.angle < -3 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1 && this.angle > -4 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1){
+                this.shape.pos.x = -8 - this.addAngle * 100;
+                this.shape.pos.y = 11 - this.addAngle * 80;
+                this.shape.rotate(-Math.PI * (1 / 8) - this.addAngle * Math.PI/2);
+            } // [120-150)°
+            if(this.angle <= -4 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1 && this.angle > -5 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1){
+                this.shape.pos.x = 70 - this.addAngle * 100;
+                this.shape.pos.y = 85 - this.addAngle * 80;
+                this.shape.rotate(Math.PI * (3 / 4) - this.addAngle * Math.PI/2);
+            } // [150-180)°
+            if(this.angle <= -5 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1 && this.angle > -6 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1){
+                this.shape.pos.x = -40 - this.addAngle * 100;
+                this.shape.pos.y = 60 - this.addAngle * 80;
+                this.shape.rotate(-Math.PI * (3 / 8) - this.addAngle * Math.PI/2);
+            } // [180]°
+            if(this.angle <= -6 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1 && this.angle >= -Math.PI ||
+               this.angle >= 6 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1 && this.angle <= Math.PI){
+                this.shape.pos.x = 65 - this.addAngle * 100;
+                this.shape.pos.y = 55 - this.addAngle * 80;
+                this.shape.rotate(Math.PI * (1 / 2) - this.addAngle * Math.PI/2);
+            } 
+            // (° in clock)
+            // (0-30)°
+            if(this.angle > 0 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1 && this.angle < 1 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1){
+                this.shape.pos.x = 105 - this.addAngle * 100;
+                this.shape.pos.y = 85 - this.addAngle * 80;
+                this.shape.rotate(Math.PI * (5 / 8) - this.addAngle * Math.PI/2);
+            } // [30-60)°
+            if(this.angle >= 1 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1 && this.angle < 2 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1){
+                this.shape.pos.x = -7 - this.addAngle * 100;
+                this.shape.pos.y = 133 - this.addAngle * 80;
+                this.shape.rotate(-Math.PI * (3 / 4) - this.addAngle * Math.PI/2);
+            } // [60-90)°
+            if(this.angle >= 2 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1 && this.angle < 3 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1){
+                this.shape.pos.x = 75 - this.addAngle * 100;
+                this.shape.pos.y = 113 - this.addAngle * 80;
+                this.shape.rotate(Math.PI * (7 / 8) - this.addAngle * Math.PI/2);
+            } // [90]°
+            if(this.angle >= 3 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1 && this.angle <= 3 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1){
+                this.shape.pos.y = 40 - this.addAngle * 80;
+            } // (90-120)°
+            if(this.angle > 3 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1 && this.angle < 4 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1){
+                this.shape.pos.x = 20 - this.addAngle * 100;
+                this.shape.pos.y = 145 - this.addAngle * 80;
+                this.shape.rotate(-Math.PI * (7 / 8) - this.addAngle * Math.PI/2);
+            } // [120-150)°
+            if(this.angle >= 4 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1 && this.angle < 5 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1){
+                this.shape.pos.x = -5 - this.addAngle * 100;
+                this.shape.pos.y = 135 - this.addAngle * 80;
+                this.shape.rotate(-Math.PI * (3 / 4) - this.addAngle * Math.PI/2);
+            } // [150-180)°
+            if(this.angle >= 5 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1 && this.angle < 6 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1){
+                this.shape.pos.x = -27 - this.addAngle * 100;
+                this.shape.pos.y = 115 - this.addAngle * 80;
+                this.shape.rotate(-Math.PI * (5 / 8) - this.addAngle * Math.PI/2);
+            }
+        }
+
+
+
+
+
+
+        // kill the rocket if out of the level
+        if(this.alive && (this.pos.x < -5 || this.pos.x > 8005 || this.pos.y < -5)){
+            this.alive = false;
+
+            //avoid further collision and delete it
+            this.body.setCollisionMask(me.collision.types.NO_OBJECT);
+
+            me.game.world.removeChild(this);
+        }
+
+        // update the body movement
+        this.body.update(dt);
+ 
+        // handle collisions against other shapes
+        me.collision.check(this);
+    },
+
+    onCollision: function(response, other){
+
+        //avoid further collision and delete it
+        this.body.setCollisionMask(me.collision.types.NO_OBJECT);
+        this.alive = false;
+        me.game.world.removeChild(this);
+
+        return false;
     }
 });  
