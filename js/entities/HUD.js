@@ -110,6 +110,10 @@ game.HUD.TextItem = me.Renderable.extend( {
         this.text = text;
     },
 
+    getText: function(){
+        return this.text;
+    },
+
     setX: function (posx) {
         this.pos.x = posx;
     }
