@@ -94,7 +94,7 @@ var game = {
         me.pool.register("HideEntity", game.HideEntity);
         me.pool.register("FuelItem", game.FuelItem);
 
-        me.pool.register("Dummy", game.Dummy)
+  //      me.pool.register("Dummy", game.Dummy)
    /*     
         me.pool.register("LightItem", game.LightItem);
         me.pool.register("enemyRoboterEntity", game.enemyRoboterEntity); 
