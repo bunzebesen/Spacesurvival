@@ -95,15 +95,15 @@ var game = {
         me.pool.register("FuelItem", game.FuelItem);
 
   //      me.pool.register("Dummy", game.Dummy)
-   /*     
-        me.pool.register("LightItem", game.LightItem);
+        
+  //      me.pool.register("LightItem", game.LightItem);
         me.pool.register("enemyRoboterEntity", game.enemyRoboterEntity); 
         me.pool.register("LaserEntity", game.LaserEntity);       
         
         
         
-        me.pool.register("PolyEntity", game.PolyEntity);
-          */
+ //       me.pool.register("PolyEntity", game.PolyEntity);
+          
 
         // load the texture atlas file
         // this will be used by object entities later
