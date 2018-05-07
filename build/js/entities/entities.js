@@ -155,7 +155,7 @@ game.PlayerEntity = me.Entity.extend({
         // near to be too high
         if (this.body.gravity <= 0.02) {
             this.body.gravity = -0.3;
-        } else if (this.body.gravity <= 0.3 && this.body.gravity > 0) {
+        } else if (this.body.gravity <= 0.3 && this.body.gravity > 0 && this.textItem.getText() == "") {
             this.textItem.setText("YOU ARE ABOUT TO LOSE GRAVITY");
             setTimeout(function() {
                 self.textItem.setText("");
@@ -236,6 +236,14 @@ game.PlayerEntity = me.Entity.extend({
           //      }
                 break;   
 
+            case me.collision.types.ACTION_OBJECT:
+                return true;
+                break;
+
+            case me.collision.types.COLLECTABLE_OBJECT:
+                return false;
+                break;
+
             case me.collision.types.ENEMY_OBJECT:
             //    if (other.isMovingEnemy ) {
                     this.hurt();  
@@ -288,14 +296,11 @@ game.PlayerEntity = me.Entity.extend({
     removeControl: function(){
         me.input.unbindKey(me.input.KEY.LEFT,  "left");
         me.input.unbindKey(me.input.KEY.RIGHT, "right");
-   //     me.input.unbindKey(me.input.KEY.SPACE, "jump", true);
         me.input.unbindKey(me.input.KEY.UP,    "up");
-   //     me.input.unbindKey(me.input.KEY.DOWN,  "down");
 
         me.input.unbindKey(me.input.KEY.A,     "left");
         me.input.unbindKey(me.input.KEY.D,     "right");
         me.input.unbindKey(me.input.KEY.W,     "up");
-  //      me.input.unbindKey(me.input.KEY.S,     "down");
     },
 
     removeInfo: function () {
@@ -316,6 +321,14 @@ game.PlayerEntity = me.Entity.extend({
             }, 2000)
             this.renderable.flicker(750);        
         }
+    },
+
+    flyUp: function(){
+        me.input.triggerKeyEvent(me.input.KEY.UP, true);
+
+        setTimeout(function(){      
+            me.input.triggerKeyEvent(me.input.KEY.UP, false);
+        }, 100);
     },
 
     victory: function() {
@@ -379,6 +392,7 @@ game.SpaceshipPartsEntity = me.CollectableEntity.extend({
     },
 
     onCollision : function (response) {
+
         // give some score
         game.data.score += 100;
 
@@ -653,19 +667,31 @@ game.enemyRoboterEntity = me.Entity.extend({
         this.body.setCollisionMask(me.collision.types.PLAYER_OBJECT | me.collision.types.WORLD_SHAPE);
 
         // don't update the entities when out of the viewport
-        this.alwaysUpdate = true;
+        this.alwaysUpdate = false;
 
         // a specific flag to recognize these enemies
         this.isMovingEnemy = true;
 
+        // activator
         this.alreadyCounted = false;
+
+        // sprite height
+        this.height = settings.spriteheight;
+
+        this.alive = true;
     },
 
     getPosX: function () {
         return this.pos.x;
     },
-    
-  //    manage the enemy movement
+
+    getPosY: function () {
+        return this.pos.y;
+    },
+
+    getWalkLeft: function () {
+        return this.walkLeft;
+    },
     
     update : function (dt) {
         var self = this;
@@ -675,6 +701,7 @@ game.enemyRoboterEntity = me.Entity.extend({
         if (this.player === null) {
             this.player = me.game.world.getChildByName("mainPlayer")[0];
         }
+
         if (this.alive)    {
             if (this.walkLeft && this.pos.x <= this.startX) {
                 this.body.vel.x = this.body.accel.x * me.timer.tick;
@@ -702,30 +729,38 @@ game.enemyRoboterEntity = me.Entity.extend({
      
     onCollision : function (response, other) {
         var self = this;
-        if (this.touched >= 5) {
+        if (this.touched >= 5 && this.alive) {
+            this.alive = false;
+            me.game.world.removeChild(this);
             this.textItem.setText("YOU KILLED THE ROBOT");
+            game.data.score += 100;
+
             var settings = {};
             settings.width = settings.spritewidth = 36;
             settings.height = settings.spriteheight = 18;
             settings.image = "starfighter_light";
             settings.z = 10;  
 
-            self.light = me.pool.pull("SpaceshipPartsEntity", self.pos.x, self.pos.y, settings);
-
+            self.light = me.pool.pull("SpaceshipPartsEntity", self.pos.x, self.pos.y + this.height - settings.height / 2, settings);
             me.game.world.addChild(self.light, self.z);
-            me.game.world.removeChild(this);
-            game.data.score += 100;
+            
+            setTimeout(function(){
+                self.textItem.setText("HE HAD SOMETHING");
+            }, 1500);
+
             setTimeout(function(){
                 self.textItem.setText("");
-            }, 2000);
+            }, 3000);
         }
 
         if ((response.overlapV.y > 0) && !this.alreadyCounted && response.a.body.collisionType === me.collision.types.PLAYER_OBJECT) {
+            this.player.flyUp();
+
             this.textItem.setText("YOU HURT THE ROBOT");
             this.touched += 1;
             setTimeout(function() {
                 self.textItem.setText("");
-            }, 2000);
+            }, 1500);
             return true;
         } else {
             return false;
@@ -751,6 +786,10 @@ game.LaserEntity = me.Entity.extend({
         this._super(me.Entity, 'init', [x, y , settings]);        
 
         this.robot = null;
+        this.player = null;
+
+        this.body.gravity = 0;
+        this.height = settings.height;
 
         this.renderable.addAnimation("idle", [0]);
         this.renderable.addAnimation("loading" [1, 2, 3, 4]);
@@ -761,8 +800,6 @@ game.LaserEntity = me.Entity.extend({
 
         this.body.collisionType = me.collision.types.PROJECTILE_OBJECT;
 
-        this.pos.x = me.game.world.getChildByName("enemyRoboterEntity")[0].getPosX();
-
         this.alwaysUpdate = true;
     },
 
@@ -770,19 +807,46 @@ game.LaserEntity = me.Entity.extend({
         if (this.robot === null) {
             this.robot = me.game.world.getChildByName("enemyRoboterEntity")[0];
         }
-        this.pos.x = this.robot.getPosX();
-        this.pos.y = 1800;
+
+        if (this.player === null) {
+            this.player = me.game.world.getChildByName("mainPlayer")[0];
+        }
+
+        /* POSITION */
+
+        if(this.robot.getWalkLeft()){
+            this.pos.x = this.robot.getPosX() + 60;
+        } else{
+            this.pos.x = this.robot.getPosX() + 10;
+        }
+        
+        this.pos.y = this.robot.getPosY() - this.height / 2;
+
+
+
+
+        /* ANGLE */
+
+        this.angle = this.angleTo(this.player) + Math.PI;
+        if(this.angle <= Math.PI / 2 || this.angle >= Math.PI * 3 / 2){
+            this.renderable.flipY(false);
+            this.renderable.angle = this.angle;
+        } else{
+            this.renderable.flipY(true);
+            this.angle2 = Math.PI * 2 - (this.angleTo(this.player) - Math.PI);
+            this.renderable.angle = this.angle2;
+        }
 
         this.body.update(dt);
     },
 
     onCollision: function (response, other) {
-        return true;
+        return false;
     }
 });
   
 /**
- * rocket
+ * old rocket
  */ 
 /*game.Rest = me.Entity.extend({
     init: function (x, y, settings) {
@@ -1082,7 +1146,7 @@ game.HideEntity = me.Entity.extend({
         this.z = settings.z = 100;
         this.color = settings.color;
 
-        this.body.collisionType = me.collision.types.ACTION_OBJECT;
+        this.body.collisionType = me.collision.types.COLLECTABLE_OBJECT;
         this.body.setCollisionMask(me.collision.types.PLAYER_OBJECT);
 
         this.alpha = 1;
