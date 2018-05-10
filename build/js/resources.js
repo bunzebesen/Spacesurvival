@@ -8,6 +8,7 @@ game.resources = [
     {name: "main_character",            type: "image",  src: "data/img/character/main_character_sprite.png"},
     {name: "robot_sprite",              type: "image",  src: "data/img/robot_sprite.png"},
     {name: "background_mars_large",     type: "image",  src: "data/img/background_mars_large.png"},
+    {name: "mountains_large",           type: "image",  src: "data/img/mountains_large.png"},
     {name: "rocket_sprite",             type: "image",  src: "data/img/rocket_sprite.png"},
     {name: "starfighter_01",            type: "image",  src: "data/img/spaceship/starfighter_01.png"},
     {name: "starfighter_body-part1",    type: "image",  src: "data/img/spaceship/starfighter_body-part1.png"},
@@ -19,6 +20,7 @@ game.resources = [
     {name: "starfighter_wing",          type: "image",  src: "data/img/spaceship/starfighter_wing.png"},
     {name: "enemy_robot_sprite",        type: "image",  src: "data/img/enemies/enemy_robot_sprite.png"},
     {name: "enemy_robot_laser_sprite",  type: "image",  src: "data/img/enemies/enemy_robot_laser_sprite.png"},
+    {name: "bullet_sprite",             type: "image",  src: "data/img/enemies/bullet.png"},
 
     {name: "black_background_1920_1080",          type: "image",  src: "data/img/black_background_1920_1080.png"},
     {name: "black_background_960_540",            type: "image",  src: "data/img/black_background_960_540.png"},
