@@ -99,7 +99,7 @@ var game = {
   //      me.pool.register("LightItem", game.LightItem);
         me.pool.register("enemyRoboterEntity", game.enemyRoboterEntity); 
         me.pool.register("LaserEntity", game.LaserEntity);       
-        
+        me.pool.register("BulletEntity", game.BulletEntity); 
         
         
  //       me.pool.register("PolyEntity", game.PolyEntity);
