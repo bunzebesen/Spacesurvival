@@ -1,2 +1,2 @@
 # spacesurvival
-To start the server enter "grunt server".
+To start the server enter "grunt server" into commando console.
