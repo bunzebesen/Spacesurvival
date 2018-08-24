@@ -68,6 +68,10 @@ game.PlayerEntity = me.Entity.extend({
 
         // set the renderable position to bottom center
         this.anchorPoint.set(0.5, 1.0);
+
+        // height and width
+        this.height = settings.height;
+        this.width = settings.width;
     },
 
     update : function (dt) {
@@ -186,7 +190,7 @@ game.PlayerEntity = me.Entity.extend({
         }
 
         // victory
-        if (game.data.foundItems >= 7 && this.pos.x >= 7000 && this.pos.y >= 1800 && !game.data.victory) {
+        if (game.data.foundItems >= 8 && this.pos.x >= 7000 && this.pos.y >= 1800 && !game.data.victory) {
             this.victory();
         }
 
@@ -318,7 +322,7 @@ game.PlayerEntity = me.Entity.extend({
             setTimeout(function() {
                 self.textItem.setText("")
                 self.alreadyHurt = false;
-            }, 2000)
+            }, 1500)
             this.renderable.flicker(750);        
         }
     },
@@ -329,6 +333,14 @@ game.PlayerEntity = me.Entity.extend({
         setTimeout(function(){      
             me.input.triggerKeyEvent(me.input.KEY.UP, false);
         }, 100);
+    },
+
+    getHeight: function(){
+        return this.height;
+    },
+
+    getWidth: function(){
+        return this.width;
     },
 
     victory: function() {
@@ -475,7 +487,7 @@ game.friendlyRoboterEntity = me.CollectableEntity.extend({
 
         this.speechBubble = me.pool.pull("robotSpeechBubble", this.pos.x + this.speechBubbleOffsetX,
         this.pos.y + this.speechBubbleOffsetY);
-        me.game.world.addChild(this.speechBubble, 8);
+        me.game.world.addChild(this.speechBubble, 10);
     },
      
     update : function (dt) {
@@ -590,7 +602,7 @@ game.robotSpeechBubble = me.Renderable.extend({
         var settings = {};
         settings.width = settings.spritewidth = 500;
         settings.height = settings.spriteheight = 1000;
-        settings.z = this.z = 1;
+        settings.z = this.z = 10;
 
         this._super(me.Renderable, 'init', [x, y, 500, 1000]);
 
@@ -616,6 +628,48 @@ game.robotSpeechBubble = me.Renderable.extend({
 
     setText: function (text) {
         this.text = text;
+    }
+});
+
+/**
+ * HP of enemy robot
+ */
+game.robotHP = me.Renderable.extend({
+    init: function (x, y, width, height) {
+        var settings = {};
+        settings.width = settings.spritewidth = 50;
+        settings.height = settings.spriteheight = 100;
+        settings.z = this.z = 40;
+
+        this._super(me.Renderable, 'init', [x, y, 500, 1000]);
+
+        this.name = "robotHP";
+
+        var fontMobile = new me.Font('monospace', 20, 'white');
+
+        var font = new me.Font('monospace', 30, 'white');
+
+        this.widthItem = 0;
+
+        if (me.device.isMobile) {
+            this.font = fontMobile;
+        } else {
+            this.font = font;
+        }
+    },
+
+    draw: function (renderer) {
+        var context = renderer.getContext();
+        this.font.draw (context, this.text, this.pos.x, this.pos.y);
+    },
+
+    setText: function (text) {
+        this.text = text;
+    },
+
+    setPos: function(x, y){
+        this.pos.x = x;
+        this.pos.y = y;
     }
 });
 
@@ -679,6 +733,10 @@ game.enemyRoboterEntity = me.Entity.extend({
         this.height = settings.spriteheight;
 
         this.alive = true;
+
+        this.hp = me.pool.pull("robotHP", this.pos.x, this.pos.y);
+        me.game.world.addChild(this.hp, 40);
+        this.hp.setText(5 + "   HP");
     },
 
     getPosX: function () {
@@ -691,6 +749,10 @@ game.enemyRoboterEntity = me.Entity.extend({
 
     getWalkLeft: function () {
         return this.walkLeft;
+    },
+
+    getAlive: function () {
+        return this.alive;
     },
     
     update : function (dt) {
@@ -717,6 +779,13 @@ game.enemyRoboterEntity = me.Entity.extend({
             this.body.update(dt);
         }
 
+        if(this.walkLeft){
+            this.hp.setPos(this.pos.x + 75, this.pos.y + 50);
+        } else{
+            this.hp.setPos(this.pos.x + 20, this.pos.y + 50);
+        }
+
+
         var collision = me.collision.check(this);
         this.alreadyCounted = collision;
 
@@ -733,6 +802,7 @@ game.enemyRoboterEntity = me.Entity.extend({
             this.alive = false;
             me.game.world.removeChild(this);
             this.textItem.setText("YOU KILLED THE ROBOT");
+            this.hp.setText("");
             game.data.score += 100;
 
             var settings = {};
@@ -741,7 +811,7 @@ game.enemyRoboterEntity = me.Entity.extend({
             settings.image = "starfighter_light";
             settings.z = 10;  
 
-            self.light = me.pool.pull("SpaceshipPartsEntity", self.pos.x, self.pos.y + this.height - settings.height / 2, settings);
+            self.light = me.pool.pull("SpaceshipPartsEntity", self.pos.x, 863, settings);
             me.game.world.addChild(self.light, self.z);
             
             setTimeout(function(){
@@ -758,6 +828,7 @@ game.enemyRoboterEntity = me.Entity.extend({
 
             this.textItem.setText("YOU HURT THE ROBOT");
             this.touched += 1;
+            this.hp.setText(5 - this.touched + "   HP");
             setTimeout(function() {
                 self.textItem.setText("");
             }, 1500);
@@ -801,6 +872,8 @@ game.LaserEntity = me.Entity.extend({
         this.body.collisionType = me.collision.types.PROJECTILE_OBJECT;
 
         this.alwaysUpdate = true;
+
+        this.startShooting = false;
     },
 
     update: function (dt) {
@@ -837,10 +910,203 @@ game.LaserEntity = me.Entity.extend({
             this.renderable.angle = this.angle2;
         }
 
+
+
+
+        if(!this.robot.getAlive()){
+            me.game.world.removeChild(this);
+        }
+
+        var self = this;
+
+        if(this.distanceTo(this.player) <= 750 && !this.startShooting){
+            this.startShooting = true;
+            this.shoot();
+
+            setTimeout(function() {
+                self.startShooting = false;
+            }, 1600)
+
+        }
+
         this.body.update(dt);
     },
 
     onCollision: function (response, other) {
+        return false;
+    },
+
+    getStartShooting: function(){
+        return this.startShooting;
+    },
+
+    shoot: function(){
+        var settings = {};
+        settings.height = 10;
+        settings.width = 50;
+        settings.z = 10;  
+
+        this.bullet = me.pool.pull("BulletEntity", this.pos.x, this.pos.y + settings.height / 2, settings);
+
+        me.game.world.addChild(this.bullet, settings.z);
+    }
+});
+
+/**
+ * bullet for laser
+ */
+game.BulletEntity = me.Entity.extend({
+    init: function (x, y, settings) {
+        settings.image = "bullet_sprite";
+
+        var width = settings.width;
+        var height = settings.height;
+
+        // adjust the setting size to the sprite one
+        settings.spritewidth = settings.width = 50;
+        settings.spriteheight = settings.height = 10;
+
+        // call the super constructor
+        this._super(me.Entity, 'init', [x, y , settings]);        
+
+        this.laser = null;
+        this.player = null;
+
+        this.body.gravity = 0;
+        this.height = settings.height;
+
+        this.updateBounds();
+
+        this.body.setCollisionMask(me.collision.types.WORLD_SHAPE | me.collision.types.PLAYER_OBJECT);
+        this.body.collisionType = me.collision.types.ENEMY_OBJECT;
+
+        this.alwaysUpdate = true;
+
+        this.tween = null;
+        this.tween2 = null;
+
+        this.applyAngle = false;
+        this.started = false;
+        this.flyAway = false;
+
+        this.playerX = 0;
+        this.playerY = 0;
+        this.xdif = 0;
+        this.ydif = 0;
+        this.t = 0;
+        this.m = 0;
+        this.b = 0;
+        this.s = 0;
+        this.v = 1.3;
+
+        var shape = this.body.getShape();
+     //   shape.scale(1, 0.35);
+    //    shape.pos.y = settings.height / 1.5;
+
+       this.body.addShape(new me.Rect(1, 1, settings.width, settings.height));
+    },
+
+    update: function (dt) {
+        if (this.laser === null) {
+            this.laser = me.game.world.getChildByName("LaserEntity")[0];
+        }
+
+        if (this.player === null) {
+            this.player = me.game.world.getChildByName("mainPlayer")[0];
+        }
+
+        var self = this;
+
+        /* POSITION */
+        if(this.laser != null){
+            if(this.laser.getStartShooting() && !this.started){
+                this.applyAngle = true;
+                this.started = true;
+                
+                this.playerX = this.player.pos.x + this.player.getWidth() / 2;
+                this.playerY = this.player.pos.y + this.player.getHeight() / 2;
+                this.ydif = this.playerY - this.pos.y;
+                this.xdif = this.playerX - this.pos.x;
+                this.m = this.ydif / this.xdif;
+                
+                this.b = this.pos.y - (this.m * this.pos.x);
+                this.s = Math.sqrt(Math.pow(this.ydif, 2) + Math.pow(this.xdif, 2));
+                this.t = this.s / this.v; 
+
+                this.tween = new me.Tween(this.pos).to({x: this.playerX, y: this.playerY}, this.t);
+                this.tween.start(); 
+            }
+        }
+
+        // arrived at player pos
+        if(this.started && this.pos.x == this.playerX && this.pos.y == this.playerY){
+            this.flyAway = true;
+        }
+
+        // fly to x = -10 or x = 8010 and y = f(-10) or f(8010) (out of level)
+        if(this.flyAway){
+            this.flyAway = false;
+
+            if(this.xdif <= 0){
+                this.x = -10;
+            } else{
+                this.x = 8010;
+            }
+
+            this.yKoord = (this.m * this.x) + this.b; 
+            this.newS = Math.sqrt(Math.pow(this.yKoord - this.pos.y, 2) + Math.pow(this.x - this.pos.x, 2));
+            this.newT = this.newS / this.v;
+
+            this.tween2 = new me.Tween(this.pos).to({x: this.x, y: this.yKoord}, this.newT);
+            this.tween2.start(); 
+        }
+
+        if(me.collision.check(this)){
+            if(this.tween != null){
+                this.tween.stop();
+            }
+
+            if(this.tween2 != null){
+                this.tween2.stop();
+            }
+        }
+
+
+        /* ANGLE */
+
+        if(this.applyAngle){
+            this.applyAngle = false;
+
+            this.angle = this.angleToPoint(new me.Vector2d(this.playerX, this.playerY)) + Math.PI;
+            if(this.angle <= Math.PI / 2 || this.angle >= Math.PI * 3 / 2){
+                this.renderable.flipY(false);
+                this.renderable.angle = this.angle;
+            } else{
+                this.renderable.flipY(true);
+                this.angle2 = Math.PI * 2 - (this.angleToPoint(new me.Vector2d(this.playerX, this.playerY)) - Math.PI);
+                this.renderable.angle = this.angle2;
+            }
+        }
+
+
+
+
+        // kill the bullet if out of the level
+        if((this.pos.x < -5 || this.pos.x > 8005 || this.pos.y < -5)){
+
+            //avoid further collision and delete it
+            this.body.setCollisionMask(me.collision.types.NO_OBJECT);
+
+            me.game.world.removeChild(this);
+        }
+
+
+        this.body.update(dt);
+    },
+
+    onCollision: function (response, other) {
+        me.game.world.removeChild(this);
+
         return false;
     }
 });
@@ -1360,13 +1626,13 @@ game.RocketEntity = me.Entity.extend({
         this.b = 0;
 
         // tween time
-        this.t = settings.t;
+        this.t = 0;//settings.t;
 
         // distance to player
         this.s = 0;
 
         // velocitiy
-        this.v = 0;
+        this.v = 1.3;
 
         // x aim
         this.x = 0;
@@ -1421,17 +1687,17 @@ game.RocketEntity = me.Entity.extend({
             this.started = true;
             this.applyAngle = true;
 
-            this.playerX = this.player.pos.x;
-            this.playerY = this.player.pos.y;
-            this.ydif = this.player.pos.y - this.pos.y;
-            this.xdif = this.player.pos.x - this.pos.x;
+            this.playerX = this.player.pos.x + this.player.getWidth() / 2;
+            this.playerY = this.player.pos.y + this.player.getHeight() / 2;
+            this.ydif = this.playerY - this.pos.y;
+            this.xdif = this.playerX - this.pos.x;
             this.m = this.ydif / this.xdif;
             
             this.b = this.pos.y - (this.m * this.pos.x);
             this.s = Math.sqrt(Math.pow(this.ydif, 2) + Math.pow(this.xdif, 2));
-            this.v = this.s / this.t; 
+            this.t = this.s / this.v; 
 
-            var tween2 = new me.Tween(this.pos).to({x: this.player.pos.x, y: this.player.pos.y}, this.t);
+            var tween2 = new me.Tween(this.pos).to({x: this.playerX, y: this.playerY}, this.t);
             tween2.start(); 
         }
 

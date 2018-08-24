@@ -87,6 +87,7 @@ var game = {
         me.pool.register("SpaceshipPartsEntity", game.SpaceshipPartsEntity);
         me.pool.register("friendlyRoboterEntity", game.friendlyRoboterEntity);
         me.pool.register("robotSpeechBubble", game.robotSpeechBubble);
+        me.pool.register("robotHP", game.robotHP);
 
 
         me.pool.register("RocketEntity", game.RocketEntity);

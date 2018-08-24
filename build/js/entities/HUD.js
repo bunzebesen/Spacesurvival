@@ -69,7 +69,7 @@ game.HUD.FoundItem = me.Renderable.extend( {
 
     draw : function (renderer) {
         var context = renderer.getContext()
-        this.font.draw (context, "FOUND SPACESHIP PARTS: " + game.data.foundItems, this.widthItem, this.height);
+        this.font.draw (context, "FOUND SPACESHIP PARTS: " + game.data.foundItems + " / 8", this.widthItem, this.height);
     },
 
     reset: function() {
