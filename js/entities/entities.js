@@ -27,10 +27,6 @@ game.PlayerEntity = me.Entity.extend({
         this.body.setFriction(0.5,0);
         this.body.gravity = 1;
 
-        //this.dying = false;
-
-    //    this.mutipleJump = 1;
-
         // angle difference of player by leaning
         this.leanVel = 0.015;
 
@@ -42,14 +38,11 @@ game.PlayerEntity = me.Entity.extend({
         // enable keyboard
         me.input.bindKey(me.input.KEY.LEFT,  "left");
         me.input.bindKey(me.input.KEY.RIGHT, "right");
-   //     me.input.bindKey(me.input.KEY.SPACE, "jump", true);
         me.input.bindKey(me.input.KEY.UP,    "up");
- //       me.input.bindKey(me.input.KEY.DOWN,  "down");
 
         me.input.bindKey(me.input.KEY.A,     "left");
         me.input.bindKey(me.input.KEY.D,     "right");
         me.input.bindKey(me.input.KEY.W,     "up");
- //       me.input.bindKey(me.input.KEY.S,     "down");
 
         var shape = this.body.getShape();
         shape.scale(0.5, 1);
@@ -72,6 +65,10 @@ game.PlayerEntity = me.Entity.extend({
         // height and width
         this.height = settings.height;
         this.width = settings.width;
+
+        // audio settings
+        this.playAudio = true;
+        this.alreadyAudioPlaying = false;
     },
 
     update : function (dt) {
@@ -99,10 +96,26 @@ game.PlayerEntity = me.Entity.extend({
         // back to idle if no key is pushed
         this.renderable.setCurrentAnimation("idle");
 
+        if(!me.input.isKeyPressed('up') && !me.input.isKeyPressed('left') && !me.input.isKeyPressed('right')){
+            me.audio.stop("jetpack");
+            this.playAudio = true;
+            this.alreadyAudioPlaying = false;
+        }
+
         // fly up
         if (me.input.isKeyPressed('up')) {
             this.body.vel.y -= this.body.accel.y * me.timer.tick;
             this.renderable.setCurrentAnimation("speed-up");
+            if(this.playAudio && this.alreadyAudioPlaying == false){
+                this.playAudio = false;
+                this.alreadyAudioPlaying = true;
+                me.audio.play("jetpack");
+                setTimeout(function() {
+                    self.playAudio = true
+                    self.alreadyAudioPlaying = false;
+                }, 1700);
+            }
+            
         }
 
         // fly left
@@ -115,6 +128,15 @@ game.PlayerEntity = me.Entity.extend({
             if (this.renderable.angle <= 0.3) {
                 this.renderable.angle += this.leanVel;
             }
+            if(this.playAudio && this.alreadyAudioPlaying == false){
+                this.playAudio = false;
+                this.alreadyAudioPlaying = true;
+                me.audio.play("jetpack");
+                setTimeout(function() {
+                    self.playAudio = true;
+                    self.alreadyAudioPlaying = false;
+                }, 1700);
+            }
         }   // fly right 
         else if (me.input.isKeyPressed('right')) {
             this.body.vel.x += this.body.accel.x * me.timer.tick;
@@ -126,6 +148,15 @@ game.PlayerEntity = me.Entity.extend({
             if (this.renderable.angle <= 0.3) {
                 this.renderable.angle += this.leanVel;
             }
+            if(this.playAudio && this.alreadyAudioPlaying == false){
+                this.playAudio = false;
+                this.alreadyAudioPlaying = true;
+                me.audio.play("jetpack");
+                setTimeout(function() {
+                    self.playAudio = true;
+                    self.alreadyAudioPlaying = false;
+                }, 1700);
+            }
         }   // stay up
          else if (this.renderable.angle >= 0) {
             this.renderable.angle -= this.leanVel;
@@ -135,23 +166,6 @@ game.PlayerEntity = me.Entity.extend({
         if (me.input.isKeyPressed('up') && (me.input.isKeyPressed('left') || me.input.isKeyPressed('right'))) {
             this.renderable.setCurrentAnimation("speed-both");
         }
-
-/*        if (me.input.isKeyPressed('jump')) {
-            this.body.jumping = true;
-
-            if (this.multipleJump <= 2) {
-                // easy 'math' for double jump
-                this.body.vel.y -= (this.body.maxVel.y * this.multipleJump++) * me.timer.tick;
-            }
-        }
-        else if (!this.body.falling && !this.body.jumping) {
-            // reset the multipleJump flag if on the ground
-            this.multipleJump = 1;
-        }
-        else if (this.body.falling && this.multipleJump < 2) {
-            // reset the multipleJump flag if falling
-            this.multipleJump = 2;
-        }  */
 
         // gravity function for the player
         this.body.gravity = (this.pos.y/(this.maxHeightOfLevel));
@@ -197,16 +211,8 @@ game.PlayerEntity = me.Entity.extend({
         // apply physics to the body (this moves the entity)
         this.body.update(dt);
 
-/*        // check if we fell into a hole
-        if (!this.inViewport && (this.pos.y > me.video.renderer.getHeight())) {
-            // if yes reset the game
-            this.death();
-        }  */
-
         // handle collisions against other shapes
         me.collision.check(this);
-
-   //     console.log(this.hitHide);
 
         // check if we moved (an "idle" animation would definitely be cleaner)
         if (this.body.vel.x!=0 || this.body.vel.y!=0 || (this.renderable && this.renderable.isFlickering())) {
@@ -222,22 +228,7 @@ game.PlayerEntity = me.Entity.extend({
         switch (other.body.collisionType) {
             // collision with world
             case me.collision.types.WORLD_SHAPE:
-                // Simulate a platform object
-             //   if (other.type === "platform") {
-            //        if (this.body.falling && !me.input.isKeyPressed('down') &&
-                        // Shortest overlap would move the player upward
-            //            (response.overlapV.y > 0) &&
-                        // The velocity is reasonably fast enough to have penetrated to the overlap depth
-            //            (~~this.body.vel.y >= ~~response.overlapV.y)
-           //         ) {
-                        // Disable collision on the x axis
-           //             response.overlapV.x = 0;
-                        // Repond to the platform (it is solid)
-                        return true;
-           //         }
-                    // Do not respond to the platform (pass through)
-           //         return false;
-          //      }
+                return true;
                 break;   
 
             case me.collision.types.ACTION_OBJECT:
@@ -249,28 +240,9 @@ game.PlayerEntity = me.Entity.extend({
                 break;
 
             case me.collision.types.ENEMY_OBJECT:
-            //    if (other.isMovingEnemy ) {
-                    this.hurt();  
-                    return true;  
-                    break;                
-            //    }  else {
-            //        return false;
-            //    }
-  /*          case me.collision.types.NPC_OBJECT:
-                if (!other.isMovingEnemy ) {
-                    // spike or any other fixed danger
-                    this.hurt();  
-                    return true;                  
-                }  else {
-                    return false;
-                }
-            case me.collision.types.PORJECTILE_OBJECT:
                 this.hurt();  
-                return true;
-            case me.collision.types.ACTION_OBJECT:
-                if ((response.overlapV.y>0)) {
-                    this.body.vel.y = -this.body.maxVel.y * me.timer.tick;
-                } */
+                return true;  
+                break;                
 
             default:
                 // Do not respond to other objects (e.g. coins)
@@ -350,11 +322,43 @@ game.PlayerEntity = me.Entity.extend({
         game.data.victory = true;
         this.spaceship.placeOnMap();
         this.textItem.setText("YOU DID IT");
+        game.data.score += (game.data.health * 100) + (Math.round(game.data.fuel));
+        if(game.highscore.entries < 10){
+            game.highscore.points[game.highscore.entries] = game.data.score;
+            game.highscore.entries++;
+            this.sortHighscore();
+        } else{
+            game.highscore.points[game.highscore.entries] = game.data.score;
+            this.sortHighscore();
+            game.highscore.points[game.highscore.entries] = null;
+        }
         setTimeout(function () {
-            game.data.score += (game.data.health * 100) + (Math.round(game.data.fuel));
             me.state.change(me.state.SCORE);
         }, 3000);
         
+    },
+
+    sortHighscore: function(){
+        var i;
+        var j;
+
+        for(i = 0; i < game.highscore.entries; i++){
+            var max = 0;
+            var maxIndex = 0;
+
+            for(j = i; j < game.highscore.entries; j++){
+                if(game.highscore.points[j] > max){
+                    max = game.highscore.points[j];
+                    maxIndex = j;
+                }
+            }
+
+            var help = 0;
+
+            help = game.highscore.points[maxIndex];
+            game.highscore.points[maxIndex] = game.highscore.points[i];
+            game.highscore.points[i] = max;
+        }
     }
 });
 
@@ -1000,8 +1004,6 @@ game.BulletEntity = me.Entity.extend({
         this.v = 1.3;
 
         var shape = this.body.getShape();
-     //   shape.scale(1, 0.35);
-    //    shape.pos.y = settings.height / 1.5;
 
        this.body.addShape(new me.Rect(1, 1, settings.width, settings.height));
     },
@@ -1110,254 +1112,6 @@ game.BulletEntity = me.Entity.extend({
         return false;
     }
 });
-  
-/**
- * old rocket
- */ 
-/*game.Rest = me.Entity.extend({
-    init: function (x, y, settings) {
-        // super constructor
-        this._super(me.Entity, 'init', [x, y, settings]);
-
-        this.player = null;
-
-        this.body.setVelocity(2, 2);
-
-        this.body.gravity = 0;
-
-        this.startPlayerPosition = settings.startPlayerPosition;
-        this.startRocketPosition = settings.startRocketPosition;
-        this.startAngle = settings.startAngle;
-
-        this.addAngle = 0;
-
-        this.shape = this.body.getShape();
-        if(this.startAngle == "0"){
-            this.shape.scale(0.5, 0.73);
-            this.shape.pos.x = 15;
-        } if(this.startAngle == "-pi/2"){
-            this.renderable.angle = -Math.PI/2;
-            this.pos.y = settings.y + 40;
-            this.shape.scale(0.73,0.5);
-            this.shape.pos.y = -25;
-            this.shape.pos.x = -40;
-            this.addAngle = 1;
-        }
-
-        this.body.collisionType = me.collision.types.ENEMY_OBJECT;
-        this.body.setCollisionMask(me.collision.types.NO_OBJECT);//me.collision.types.WORLD_SHAPE | me.collision.types.PLAYER_OBJECT);
-
-        // still animation
-        this.renderable.addAnimation ("idle", [0]);
-
-        // fly animatin
-        this.renderable.addAnimation ("fly", [5]);
-
-        // set default one
-        this.renderable.setCurrentAnimation("idle");
-
-        this.started = false;
-        this.start1 = false;
-        this.start2 = false;
-        this.playerX = 0;
-        this.playerY = 0;
-
-        this.alwaysUpdate = false;
-
-        // set the renderable position to bottom center
-        this.anchorPoint.set(0.5, 1.0);
-    },
-
-    update: function (dt) {
-        if (this.player === null) {
-            this.player = me.game.world.getChildByName("mainPlayer")[0];
-        }
-
-        this.renderable.setCurrentAnimation("fly");
-
-        // player is close enough
-        if ((this.distanceTo(this.player) <= 800 && this.player.pos.y <= this.startPlayerPosition) && !this.started && !this.start1 && !this.start2) {
-            if(this.startAngle == "0"){
-                this.body.vel.y = -this.body.accel.y * me.timer.tick;
-            } if(this.startAngle == "-pi/2"){
-                this.body.vel.x = -this.body.accel.x * me.timer.tick;
-            }
-            this.start1 = true;
-        }
-        // rocket has started
-        if(this.startAngle == "0"){
-           if (this.pos.y <= this.startRocketPosition && !this.start2) {
-                this.started = true;
-                this.start2 = true;
-            }
-        } if(this.startAngle == "-pi/2"){
-            if (this.pos.x <= this.startRocketPosition && !this.start2) {
-                this.started = true;
-                this.start2 = true;
-            }
-        }
-
-        // fly towards player
-        if(this.started){
-            this.started = false;
-            // safe player position
-            this.playerY = this.player.pos.y;
-            this.playerX = this.player.pos.x;
-            // angle to player position
-            this.angle = this.angleToPoint(new me.Vector2d(this.playerX, this.playerY));
-            // set angle to entity over time
-        //    var tween = new me.Tween(this.renderable).to({angle: this.angle + (Math.PI / 2)}, 500);
-        //    tween.start(); 
-            this.renderable.angle = this.angle + (Math.PI / 2);
-            // set angle to shape 
-            // (° against clock)
-            // [0]°
-            if(this.angle >= 0 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1 && this.angle <= 0 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1){
-                this.shape.pos.x = 105 - this.addAngle * 100;
-                this.shape.pos.y = 55 - this.addAngle * 80;
-                this.shape.rotate(-Math.PI * (3 / 2) - this.addAngle * Math.PI/2);
-            }
-            // (0-30)° 
-            if(this.angle < 0 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1 && this.angle > -1 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1){
-                this.shape.pos.x = 93 - this.addAngle * 100;
-                this.shape.pos.y = 30 - this.addAngle * 80;
-                this.shape.rotate(Math.PI * (3 / 8) - this.addAngle * Math.PI/2);
-            } // [30-60)°
-            if(this.angle <= -1 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1 && this.angle > -2 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1){
-                this.shape.pos.x = 21 - this.addAngle * 100;
-                this.shape.pos.y = 107 - this.addAngle * 80;
-                this.shape.rotate(-Math.PI * (3 / 4) - this.addAngle * Math.PI/2);
-            } // [60-90)°
-            if(this.angle <= -2 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1 && this.angle > -3 * ((Math.PI/2 - 0.2) / 3) - 1 * 0.1){
-                this.shape.pos.x = 46 - this.addAngle * 100;
-                this.shape.pos.y = 0 - this.addAngle * 80;
-                this.shape.rotate(Math.PI * (1 / 8) - this.addAngle * Math.PI/2);
-            } // [90]°
-            if(this.angle <= -3 * ((Math.PI/2 - 0.2) / 3) - 2 * 0.1 && this.angle >= -3 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1){
-                // nothing
-            } // (90-120)° 
-            if(this.angle < -3 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1 && this.angle > -4 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1){
-                this.shape.pos.x = -8 - this.addAngle * 100;
-                this.shape.pos.y = 11 - this.addAngle * 80;
-                this.shape.rotate(-Math.PI * (1 / 8) - this.addAngle * Math.PI/2);
-            } // [120-150)°
-            if(this.angle <= -4 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1 && this.angle > -5 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1){
-                this.shape.pos.x = 70 - this.addAngle * 100;
-                this.shape.pos.y = 85 - this.addAngle * 80;
-                this.shape.rotate(Math.PI * (3 / 4) - this.addAngle * Math.PI/2);
-            } // [150-180)°
-            if(this.angle <= -5 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1 && this.angle > -6 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1){
-                this.shape.pos.x = -40 - this.addAngle * 100;
-                this.shape.pos.y = 60 - this.addAngle * 80;
-                this.shape.rotate(-Math.PI * (3 / 8) - this.addAngle * Math.PI/2);
-            } // [180]°
-            if(this.angle <= -6 * ((Math.PI/2 - 0.2) / 3) - 3 * 0.1 && this.angle >= -Math.PI ||
-               this.angle >= 6 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1 && this.angle <= Math.PI){
-                this.shape.pos.x = 65 - this.addAngle * 100;
-                this.shape.pos.y = 55 - this.addAngle * 80;
-                this.shape.rotate(Math.PI * (1 / 2) - this.addAngle * Math.PI/2);
-            } 
-            // (° in clock)
-            // (0-30)°
-            if(this.angle > 0 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1 && this.angle < 1 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1){
-                this.shape.pos.x = 105 - this.addAngle * 100;
-                this.shape.pos.y = 85 - this.addAngle * 80;
-                this.shape.rotate(Math.PI * (5 / 8) - this.addAngle * Math.PI/2);
-            } // [30-60)°
-            if(this.angle >= 1 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1 && this.angle < 2 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1){
-                this.shape.pos.x = -7 - this.addAngle * 100;
-                this.shape.pos.y = 133 - this.addAngle * 80;
-                this.shape.rotate(-Math.PI * (3 / 4) - this.addAngle * Math.PI/2);
-            } // [60-90)°
-            if(this.angle >= 2 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1 && this.angle < 3 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1){
-                this.shape.pos.x = 75 - this.addAngle * 100;
-                this.shape.pos.y = 113 - this.addAngle * 80;
-                this.shape.rotate(Math.PI * (7 / 8) - this.addAngle * Math.PI/2);
-            } // [90]°
-            if(this.angle >= 3 * ((Math.PI/2 - 0.2) / 3) + 1 * 0.1 && this.angle <= 3 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1){
-                this.shape.pos.y = 40 - this.addAngle * 80;
-            } // (90-120)°
-            if(this.angle > 3 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1 && this.angle < 4 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1){
-                this.shape.pos.x = 20 - this.addAngle * 100;
-                this.shape.pos.y = 145 - this.addAngle * 80;
-                this.shape.rotate(-Math.PI * (7 / 8) - this.addAngle * Math.PI/2);
-            } // [120-150)°
-            if(this.angle >= 4 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1 && this.angle < 5 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1){
-                this.shape.pos.x = -5 - this.addAngle * 100;
-                this.shape.pos.y = 135 - this.addAngle * 80;
-                this.shape.rotate(-Math.PI * (3 / 4) - this.addAngle * Math.PI/2);
-            } // [150-180)°
-            if(this.angle >= 5 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1 && this.angle < 6 * ((Math.PI/2 - 0.2) / 3) + 3 * 0.1){
-                this.shape.pos.x = -27 - this.addAngle * 100;
-                this.shape.pos.y = 115 - this.addAngle * 80;
-                this.shape.rotate(-Math.PI * (5 / 8) - this.addAngle * Math.PI/2);
-            }
-
-
-            // movement direction
-            if(this.playerX <= this.pos.x){
-      //          this.body.vel.x = -this.body.accel.x * me.timer.tick;
-            } else if(this.playerX > this.pos.x){
-       //         this.body.vel.x = +this.body.accel.x * me.timer.tick;
-            }
-            if(this.playerY > this.pos.y){
-        //        this.body.vel.y = this.body.accel.y * me.timer.tick;
-            }
-            // movement angle
-
-        }
-
-     //       console.log(this.player.pos.y);
-
-       // console.log(this.angle / Math.PI);
-           } else if (this.started) {
-            if (this.pos.x <= this.player.pos.x) {
-                this.body.vel.x = this.body.accel.x * me.timer.tick;
-            } else if (this.pos.x >= this.player.pos.x) {
-                this.body.vel.x = -this.body.accel.x * me.timer.tick;
-            }
-
-            if (this.pos.y <= this.player.pos.y) {
-                this.body.vel.y = this.body.accel.y * me.timer.tick;
-
-            } else if (this.pos.y >= this.player.pos.y) {
-                this.body.vel.y = -this.body.accel.y * me.timer.tick;
-
-            }
-            // make it walk
-            this.angle = this.angleTo(this.player);
-            this.renderable.angle = (Math.PI / 2) + this.angle;  
-        }
-
-        if ((this.angle >= 2.8 && this.angle <= 3.3) || (this.angle <= 0.04 && this.angle >= -0.04)) {
-            this.body.setVelocity(8, 2.5);
-        }  
-
-        if (this.pos.y < 1000) {
-      //      this.started = true;
-        }
-
-        if (this.angle >= -1.46 && this.angle <= -1.6) {
-    //        this.body.setVelocity(4, 5);
-        }
-
-        // update the body movement
-        this.body.update(dt);
- 
-        // handle collisions against other shapes
-        me.collision.check(this);
- 
-        // return true if we moved or if the renderable was updated
-        return (this._super(me.Entity, 'update', [dt]) || this.body.vel.x !== 0 || this.body.vel.y !== 0);
-    },  
-
-    onCollision: function (response) {
-        me.game.world.removeChild(this);
-
-        // Make all other objects solid
-        return false;
-    }
-});  */
 
 /**
  * complete spaceship
@@ -1659,17 +1413,19 @@ game.RocketEntity = me.Entity.extend({
 
 
 
-
         /* ROCKET MOVEMENT */
 
         // start rocket
         if(this.distanceTo(this.player) < 750 && !this.start && !this.started){
-            this.renderable.setCurrentAnimation("fly");
 
             if(this.startAngle == "0" && this.player.pos.y <= this.startPos){
+                this.renderable.setCurrentAnimation("fly");
                 this.tween0 = new me.Tween(this.pos).to({y: this.startPos}, 300);
                 this.tween0.start(); 
-            } else if(this.startAngle == "-pi/2" && this.pos.x >= this.player.pos.x){
+            } 
+
+            if(this.startAngle == "-pi/2" && this.pos.x >= (this.player.pos.x + 500)){
+                this.renderable.setCurrentAnimation("fly");
                 this.tween1 = new me.Tween(this.pos).to({x: this.startPos}, 250);
                 this.tween1.start(); 
             }
