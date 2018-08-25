@@ -23,9 +23,9 @@ game.PlayScreen = me.ScreenObject.extend({
 
         // Mobile UI
         if (me.device.isMobile) {
-            this.UI.addChild(new game.UI.Button(0,                                  0, me.game.viewport.width / 3, me.game.viewport.height,     me.input.KEY.LEFT));
+            this.UI.addChild(new game.UI.Button(0,                                  0, me.game.viewport.width / 3, me.game.viewport.height, me.input.KEY.LEFT));
             this.UI.addChild(new game.UI.Button(me.game.viewport.width / 3,         0, me.game.viewport.width / 3, me.game.viewport.height, me.input.KEY.UP));
-            this.UI.addChild(new game.UI.Button(me.game.viewport.width * (2 / 3),   0, me.game.viewport.width / 3, me.game.viewport.height,     me.input.KEY.RIGHT));
+            this.UI.addChild(new game.UI.Button(me.game.viewport.width * (2 / 3),   0, me.game.viewport.width / 3, me.game.viewport.height, me.input.KEY.RIGHT));
         }  
     },
     
