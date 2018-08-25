@@ -6,8 +6,7 @@ game.ScoreScreen = me.ScreenObject.extend({
 
         if (me.device.isMobile) {
             this.UI.addChild(new game.UI.Button(0,                          0, me.game.viewport.width / 2, me.game.viewport.height, me.input.KEY.ESC));            
-            this.UI.addChild(new game.UI.Button(me.game.viewport.width / 2, 0, me.game.viewport.width / 2, me.game.viewport.height, me.input.KEY.ENTER));       
-            this.UI.addChild(new game.GUI.TextField(me.game.viewport.width / 2, 400, "text", 600));        
+            this.UI.addChild(new game.UI.Button(me.game.viewport.width / 2, 0, me.game.viewport.width / 2, me.game.viewport.height, me.input.KEY.ENTER));                          
         }
 
 
@@ -26,8 +25,6 @@ game.ScoreScreen = me.ScreenObject.extend({
 
                 var font = new me.Font('monospace', 45, 'white');
 
-//                this.widthItem = 0;
-
                 this.text1 = "YOUR SCORE: " + game.data.score;
                 this.text2 = "PRESS ESCAPE TO EXIT";
                 this.text3 = "PRESS ENTER TO PLAY AGAIN";
@@ -37,20 +34,8 @@ game.ScoreScreen = me.ScreenObject.extend({
                 this.text7 = "TAP HERE TO ENTER HIGHSCORE";
 
                 if (me.device.isMobile) {
-   /*                 this.widthItem = me.game.viewport.width - ((2.8 / 3) * me.game.viewport.width);
-                    this.height1 = 200;
-                    this.height2 = 225;
-                    this.height3 = 250;
-                    this.height4 = 275;
-                    this.height5 = 300;   */
                     this.font = fontMobile;
                 } else {
-      /*              this.widthItem = me.game.viewport.width - ((2.9 / 3) * me.game.viewport.width);
-                    this.height1 = 350;
-                    this.height2 = 400;
-                    this.height3 = 450;
-                    this.height4 = 500;
-                    this.height5 = 550;   */
                     this.font = font;
                 }   
             },
@@ -84,7 +69,7 @@ game.ScoreScreen = me.ScreenObject.extend({
                 // play something on enter
                 me.state.change(me.state.PLAY);
             } else if (action === "escape") {
-                me.state.change(me.state.INFO);
+                me.state.change(me.state.MENU);
             } else if(action === "space"){
                 me.state.change(me.state.HIGHSCORE);
             }
