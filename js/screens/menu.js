@@ -37,7 +37,7 @@ game.MenuScreen = me.ScreenObject.extend({
                 this.text10 = "AND U CAN SEE YOUR CHILDREN AGAIN.";
                 this.text11 = "GOOD LUCK";
                 this.text12 = "PRESS ENTER TO START THE GAME";
-                this.text13 ="TAP THE SCREEN TO START THE GAME";
+                this.text13 = "TAP THE SCREEN TO START THE GAME";
 
                 if (me.device.isMobile) {
                     this.widthItem = me.game.viewport.width - ((2.8 / 3) * me.game.viewport.width);
