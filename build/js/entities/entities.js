@@ -259,14 +259,9 @@ game.PlayerEntity = me.Entity.extend({
 
         setTimeout(function(){      
             me.game.world.removeChild(self);  
-            self.textItem.setText("");                 
-            self.foundItem.reset();          
-            self.healthItem.reset();
-            self.fuelItem.reset();        
+            self.textItem.setText("");                      
             me.levelDirector.reloadLevel();
         }, 3000);
-        return true;
-
     },
 
     removeControl: function(){
