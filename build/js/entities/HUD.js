@@ -1,5 +1,3 @@
-
-
 /**
  * a HUD container and child items
  */
@@ -53,8 +51,6 @@ game.HUD.FoundItem = me.Renderable.extend( {
         var fontMobile = new me.Font('monospace', 20, 'white');
 
         var font = new me.Font('monospace', 50, 'white');
-
-//        this.found = 0;
 
         if (me.device.isMobile) {
             this.widthItem = me.game.viewport.width - ((2.8 / 3) * me.game.viewport.width);
@@ -156,10 +152,6 @@ game.HUD.FuelItem = me.Renderable.extend( {
         if (game.data.fuel <= 0) {
             game.data.fuel = 0;
         }
-
-   /*     if (game.data.fuel > 300) {
-            this.heightBlack -= 50;
-        }  */
     },
 
     draw: function (renderer) {
@@ -330,30 +322,4 @@ game.UI.Button = me.Renderable.extend({
         me.input.releasePointerEvent("pointerdown", this);
         me.input.releasePointerEvent("pointerup",   this);
     },
-});
-
-game.UI.TextInput = me.Renderable.extend({
-    init : function (x, y, type, length) {
-        this.$input = $('<input type="' + type + '" required>').css({
-            "left" : x,
-            "top" : y
-        });
-
-        switch (type) {
-        case "text":
-            this.$input
-                .attr("maxlength", length)
-                .attr("pattern", "[a-zA-Z0-9_\-]+");
-            break;
-        case "number":
-            this.$input.attr("max", length);
-            break;
-        }
-
-        $(me.video.getWrapper()).append(this.$input);
-    },
-
-    destroy : function () {
-        this.$input.remove();
-    }
 });

@@ -15,8 +15,8 @@ var game = {
     },
 
     highscore : {
-        names : ['Timo', 'Hans'],
-        points : [1200, 666],
+        entries: 0,
+        points : [],
     },
 
     /**
@@ -95,20 +95,11 @@ var game = {
         me.pool.register("HideEntity", game.HideEntity);
         me.pool.register("FuelItem", game.FuelItem);
 
-  //      me.pool.register("Dummy", game.Dummy)
-        
-  //      me.pool.register("LightItem", game.LightItem);
+
         me.pool.register("enemyRoboterEntity", game.enemyRoboterEntity); 
         me.pool.register("LaserEntity", game.LaserEntity);       
         me.pool.register("BulletEntity", game.BulletEntity); 
         
-        
- //       me.pool.register("PolyEntity", game.PolyEntity);
-          
-
-        // load the texture atlas file
-        // this will be used by object entities later
-    //    game.texture = new me.TextureAtlas(me.loader.getJSON("texture"), me.loader.getImage("texture"));
 
         // add some keyboard shortcuts
         me.event.subscribe(me.event.KEYDOWN, function (action, keyCode, edge) {
