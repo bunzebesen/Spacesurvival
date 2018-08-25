@@ -41,7 +41,7 @@
   </data>
  </layer>
  <objectgroup name="entities">
-  <object id="1" name="mainPlayer" x="6648.33" y="1481.82" width="104" height="164">
+  <object id="1" name="mainPlayer" x="3.33333" y="1609.82" width="104" height="164">
    <properties>
     <property name="image" value="main_character"/>
     <property name="spriteheight" value="160"/>
@@ -116,13 +116,6 @@
   </object>
   <object id="238" name="EnvironmentalEnemy" x="2462.5" y="1247">
    <polyline points="0,0 34,-31.5 48.5,-17.5 48.5,-33 65.5,-48 64.5,-30.5 82.5,-15 81.5,-32.5 97,-47.5 98,-63 113,-50 113.5,-31.5 127.5,-18 129,-31 145.5,-17 160.5,-31 160.5,-47.5 177,-64 178.5,-30.5 193.5,-17 193.5,-47 207.5,-33 225.5,-47 225.5,-63 241,-48.5 256.5,-64.5 256.5,-47.5 273,-32"/>
-  </object>
-  <object id="242" name="Dummy" x="785" y="1880" width="64" height="144">
-   <properties>
-    <property name="height" value="144"/>
-    <property name="image" value="rocket_sprite"/>
-    <property name="width" value="64"/>
-   </properties>
   </object>
   <object id="244" name="RocketEntity" x="1728" y="784" width="64" height="144" rotation="90">
    <properties>
