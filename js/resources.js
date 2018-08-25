@@ -7,8 +7,6 @@ game.resources = [
     {name: "atascii",                   type: "image",  src: "data/img/atascii_24px.png"},
     {name: "main_character",            type: "image",  src: "data/img/character/main_character_sprite.png"},
     {name: "robot_sprite",              type: "image",  src: "data/img/robot_sprite.png"},
-    {name: "background_mars_large",     type: "image",  src: "data/img/background_mars_large.png"},
-    {name: "mountains_large",           type: "image",  src: "data/img/mountains_large.png"},
     {name: "rocket_sprite",             type: "image",  src: "data/img/rocket_sprite.png"},
     {name: "starfighter_01",            type: "image",  src: "data/img/spaceship/starfighter_01.png"},
     {name: "starfighter_body-part1",    type: "image",  src: "data/img/spaceship/starfighter_body-part1.png"},
@@ -22,6 +20,10 @@ game.resources = [
     {name: "enemy_robot_laser_sprite",  type: "image",  src: "data/img/enemies/enemy_robot_laser_sprite.png"},
     {name: "bullet_sprite",             type: "image",  src: "data/img/enemies/bullet.png"},
 
+    {name: "background_mars_large",     type: "image",  src: "data/img/background_mars_large.png"},
+    {name: "mountains_large",           type: "image",  src: "data/img/mountains_large.png"},
+    {name: "mountains_small",           type: "image",  src: "data/img/mountains_small.png"},
+
     {name: "black_background_1920_1080",          type: "image",  src: "data/img/black_background_1920_1080.png"},
     {name: "black_background_960_540",            type: "image",  src: "data/img/black_background_960_540.png"},
     {name: "background_solar_system_1920_1080",   type: "image",  src: "data/img/background_solar_system_1920_1080.png"},
@@ -32,8 +34,7 @@ game.resources = [
      * {name: "example01", type: "tmx", src: "data/map/example01.tmx"},
      * {name: "example01", type: "tmx", src: "data/map/example01.json"},
      */
-    //{name: "level1",                    type: "tmx",    src: "data/map/level1.tmx"},
-    {name: "level1",                    type: "tmx",   src: "data/map/level1.tmx"},
+    {name: "level1",                    type: "tmx",    src: "data/map/level1.tmx"},
 
 
     /* Tilesets.
@@ -56,14 +57,10 @@ game.resources = [
      * @example
      * {name: "example_sfx", type: "audio", src: "data/sfx/"}
      */
+     {name: "jetpack",                  type: "audio",  src: "data/sound/"},
 
     /* Atlases
      * @example
      * {name: "example_tps", type: "json", src: "data/img/example_tps.json"},
      */
-    // texturePacker
- //   {name: "texture",                   type: "json",   src: "data/img/texture.json"},
-    // ShoeBox
-    //{name: "texture",         type: "json",   src: "data/gfx/shoebox.json"},
-    //{name: "texture",         type: "image",  src: "data/gfx/shoebox.png"}
 ];
