@@ -368,6 +368,8 @@ game.EnvironmentalEnemy = me.Entity.extend({
         this._super(me.Entity, 'init', [x, y, settings]);
 
         this.body.collisionType = me.collision.types.ENEMY_OBJECT;
+
+        this.alwaysUpdate = false;
     }
 });
 
@@ -380,6 +382,8 @@ game.PlatformEntity = me.Entity.extend({
 
         this.body.collisionType = me.collision.types.WORLD_SHAPE;
         this.body.setCollisionMask(me.collision.types.PLAYER_OBJECT);
+
+        this.alwaysUpdate = false;
     }
 });
 
@@ -402,6 +406,8 @@ game.SpaceshipPartsEntity = me.CollectableEntity.extend({
 
             this.body.addShape(new me.Rect(250, this.y, settings.width / 2, settings.height));
         }
+
+        this.alwaysUpdate = false;
 
     },
 
@@ -621,6 +627,8 @@ game.robotSpeechBubble = me.Renderable.extend({
         } else {
             this.font = font;
         }
+
+        this.alwaysUpdate = false;
     },
 
     draw: function (renderer) {
@@ -658,6 +666,8 @@ game.robotHP = me.Renderable.extend({
         } else {
             this.font = font;
         }
+
+        this.alwaysUpdate = false;
     },
 
     draw: function (renderer) {
@@ -873,7 +883,7 @@ game.LaserEntity = me.Entity.extend({
 
         this.body.collisionType = me.collision.types.PROJECTILE_OBJECT;
 
-        this.alwaysUpdate = true;
+        this.alwaysUpdate = false;
 
         this.startShooting = false;
     },
@@ -1135,6 +1145,8 @@ game.SpaceshipEntity = me.Entity.extend({
         this.y = settings.y;
 
         this.body.gravity = 0;
+
+        this.alwaysUpdate = false;
     },
 
     update: function (dt) {
@@ -1171,6 +1183,8 @@ game.HideEntity = me.Entity.extend({
 
         this.collided = false;
         this.colliding = false;
+
+        this.alwaysUpdate = false;
     },
 
     draw : function(renderer) {
@@ -1302,6 +1316,8 @@ game.FuelItem = me.Entity.extend({
         settings.spriteheight = settings.height;
 
         this.body.collisionType = me.collision.types.COLLECTABLE_OBJECT;
+
+        this.alwaysUpdate = false;
     },
 
     onCollision : function (response) {
